@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <title>Mera AI Assistant</title>
+    <style>
+        body { font-family: sans-serif; background: #0f172a; color: white; max-width: 600px; margin: 40px auto; padding: 20px; }
+        .box { background: #1e293b; padding: 20px; border-radius: 12px; }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; box-sizing: border-box; font-size: 15px; }
+        button { width: 100%; padding: 12px; background: #22c55e; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button:hover { background: #16a34a; }
+        #output { margin-top: 20px; padding: 15px; background: #0f172a; border-radius: 8px; white-space: pre-wrap; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>🤖 Mera Personal AI</h2>
+        <input type="password" id="key" placeholder="Yahan apni Gemini API Key paste karo">
+        <textarea id="prompt" rows="3" placeholder="Apna sawal yahan likho..."></textarea>
+        <button onclick="runAI()">Jawab Pucho</button>
+        <div id="output">Yahan AI ka jawab aayega...</div>
+    </div>
+
+    <script>
+        async function runAI() {
+            const key = document.getElementById("key").value.trim();
+            const prompt = document.getElementById("prompt").value.trim();
+            const output = document.getElementById("output");
+
+            if (!key || !prompt) {
+                output.innerText = "Bhai, pehle API Key aur Sawal dono bharo!";
+                return;
+            }
+
+            output.innerText = "Soch raha hoon...";
+
+            try {
+                const res = await fetch("https://googleapis.com" + key, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await res.json();
+                if (data.error) {
+                    output.innerText = "API Error: " + data.error.message;
+                } else {
+                    output.innerText = data.candidates[0].content.parts[0].text;
+                }
+            } catch (e) {
+                output.innerText = "Network Error: " + e.message;
+            }
+        }
+    </script>
+</body>
+</html>
+
