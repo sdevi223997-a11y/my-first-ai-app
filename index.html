@@ -15,7 +15,7 @@
 <body>
     <div class="box">
         <h2>🤖 Mera Personal AI</h2>
-        <input type="password" id="key" placeholder="Yahan apni Gemini API Key paste karo">
+        <input type="password" id="key" placeholder="Yahan apni AQ... wali API Key paste karo">
         <textarea id="prompt" rows="3" placeholder="Apna sawal yahan likho..."></textarea>
         <button onclick="runAI()">Jawab Pucho</button>
         <div id="output">Yahan AI ka jawab aayega...</div>
@@ -34,15 +34,22 @@
 
             output.innerText = "Soch raha hoon...";
 
+            // AQ... aur AIza... dono keys ke liye Vertex AI Express / Gemini endpoint
+            const url = key.startsWith("AQ.") 
+                ? `https://googleapis.com{encodeURIComponent(key)}`
+                : `https://googleapis.com{encodeURIComponent(key)}`;
+
             try {
-                const res = await fetch("https://googleapis.com" + key, {
+                const res = await fetch(url, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: prompt }] }]
+                    })
                 });
                 const data = await res.json();
                 if (data.error) {
-                    output.innerText = "API Error: " + data.error.message;
+                    output.innerText = "API Error (" + data.error.code + "): " + data.error.message;
                 } else {
                     output.innerText = data.candidates[0].content.parts[0].text;
                 }
@@ -53,4 +60,3 @@
     </script>
 </body>
 </html>
-
