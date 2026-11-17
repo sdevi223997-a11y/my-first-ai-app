@@ -18,12 +18,14 @@
         <h2>🤖 Mera Personal AI</h2>
         <input type="password" id="key" placeholder="Yahan apni API Key paste karo">
         <textarea id="prompt" rows="3" placeholder="Apna sawal yahan likho..."></textarea>
-        <button onclick="runAI()">Jawab Pucho</button>
+        <button id="askBtn">Jawab Pucho</button>
         <div id="output">Yahan AI ka jawab aayega...</div>
     </div>
 
-    <script>
-        async function runAI() {
+    <script type="module">
+        import { GoogleGenAI } from "https://esm.run";
+
+        document.getElementById("askBtn").addEventListener("click", async () => {
             const key = document.getElementById("key").value.trim();
             const prompt = document.getElementById("prompt").value.trim();
             const output = document.getElementById("output");
@@ -35,26 +37,17 @@
 
             output.innerText = "Soch raha hoon...";
 
-            const targetUrl = "https://googleapis.com" + encodeURIComponent(key);
-            const proxyUrl = "https://corsproxy.io?" + encodeURIComponent(targetUrl);
-
             try {
-                const res = await fetch(proxyUrl, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }]
-                    })
+                const ai = new GoogleGenAI({ apiKey: key });
+                const response = await ai.models.generateContent({
+                    model: "gemini-2.5-flash",
+                    contents: prompt,
                 });
-                const data = await res.json();
-                if (data.error) {
-                    output.innerText = "Error: " + data.error.message;
-                } else {
-                    output.innerText = data.candidates[0].content.parts[0].text;
-                }
+                output.innerText = response.text;
             } catch (e) {
-                output.innerText = "Error: " + e.message;
+                output.innerText = "Error: " + (e.message || JSON.stringify(e));
             }
-        }
+        });
     </script>
 </body>
+</html>
