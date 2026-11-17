@@ -2,10 +2,11 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <title>Mera AI Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mera Personal AI</title>
     <style>
         body { font-family: sans-serif; background: #0f172a; color: white; max-width: 600px; margin: 40px auto; padding: 20px; }
-        .box { background: #1e293b; padding: 20px; border-radius: 12px; }
+        .box { background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
         input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: none; box-sizing: border-box; font-size: 15px; }
         button { width: 100%; padding: 12px; background: #22c55e; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
         button:hover { background: #16a34a; }
@@ -15,7 +16,7 @@
 <body>
     <div class="box">
         <h2>🤖 Mera Personal AI</h2>
-        <input type="password" id="key" placeholder="Yahan apni AQ... wali API Key paste karo">
+        <input type="password" id="key" placeholder="Yahan apni API Key paste karo">
         <textarea id="prompt" rows="3" placeholder="Apna sawal yahan likho..."></textarea>
         <button onclick="runAI()">Jawab Pucho</button>
         <div id="output">Yahan AI ka jawab aayega...</div>
@@ -28,35 +29,32 @@
             const output = document.getElementById("output");
 
             if (!key || !prompt) {
-                output.innerText = "Bhai, pehle API Key aur Sawal dono bharo!";
+                output.innerText = "Pehle API Key aur Sawal dono bharo!";
                 return;
             }
 
             output.innerText = "Soch raha hoon...";
 
-            // AQ... aur AIza... dono keys ke liye Vertex AI Express / Gemini endpoint
-            const url = key.startsWith("AQ.") 
-                ? `https://googleapis.com{encodeURIComponent(key)}`
-                : `https://googleapis.com{encodeURIComponent(key)}`;
+            const targetUrl = "https://googleapis.com" + encodeURIComponent(key);
+            const proxyUrl = "https://corsproxy.io?" + encodeURIComponent(targetUrl);
 
             try {
-                const res = await fetch(url, {
+                const res = await fetch(proxyUrl, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        contents: [{ role: "user", parts: [{ text: prompt }] }]
+                        contents: [{ parts: [{ text: prompt }] }]
                     })
                 });
                 const data = await res.json();
                 if (data.error) {
-                    output.innerText = "API Error (" + data.error.code + "): " + data.error.message;
+                    output.innerText = "Error: " + data.error.message;
                 } else {
                     output.innerText = data.candidates[0].content.parts[0].text;
                 }
             } catch (e) {
-                output.innerText = "Network Error: " + e.message;
+                output.innerText = "Error: " + e.message;
             }
         }
     </script>
 </body>
-</html>
