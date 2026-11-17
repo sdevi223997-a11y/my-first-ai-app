@@ -22,10 +22,8 @@
         <div id="output">Yahan AI ka jawab aayega...</div>
     </div>
 
-    <script type="module">
-        import { GoogleGenAI } from "https://esm.run";
-
-        document.getElementById("askBtn").addEventListener("click", async () => {
+    <script>
+        document.getElementById("askBtn").addEventListener("click", async function() {
             const key = document.getElementById("key").value.trim();
             const prompt = document.getElementById("prompt").value.trim();
             const output = document.getElementById("output");
@@ -38,14 +36,21 @@
             output.innerText = "Soch raha hoon...";
 
             try {
-                const ai = new GoogleGenAI({ apiKey: key });
-                const response = await ai.models.generateContent({
-                    model: "gemini-2.5-flash",
-                    contents: prompt,
+                const res = await fetch("https://googleapis.com" + encodeURIComponent(key), {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
                 });
-                output.innerText = response.text;
+                const data = await res.json();
+                if (data.error) {
+                    output.innerText = "Google Error (" + data.error.code + "): " + data.error.message;
+                } else {
+                    output.innerText = data.candidates[0].content.parts[0].text;
+                }
             } catch (e) {
-                output.innerText = "Error: " + (e.message || JSON.stringify(e));
+                output.innerText = "Error: " + e.message;
             }
         });
     </script>
